@@ -358,7 +358,11 @@ function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate,default
         <div className="modal-footer">
           {editEvent&&<button className="btn-danger" onClick={()=>onDelete(editEvent.id)}>Eliminar</button>}
           <button className="btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className={`btn-primary ${owner}`} onClick={handleSave} disabled={!title.trim()||!date}>Guardar</button>
+          <button className={`btn-primary ${owner}`} onClick={()=>{
+            if(!title.trim()){alert('Por favor escribe un título para la actividad.');return;}
+            if(!date){alert('Por favor selecciona una fecha.');return;}
+            handleSave();
+          }}>{editEvent?'Guardar cambios':'Crear Actividad'}</button>
         </div>
       </div>
     </div>
