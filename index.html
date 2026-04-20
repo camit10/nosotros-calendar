@@ -2,8 +2,17 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nosotros — Calendario Compartido</title>
+
+<!-- PWA / iPhone support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nosotros">
+<meta name="theme-color" content="#1C1917">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -23,7 +32,6 @@
   h1,h2,h3{font-family:'Playfair Display',serif}
   button{cursor:pointer;border:none;background:none;font-family:inherit}
   input,textarea,select{font-family:inherit}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 
   /* Layout */
   .app{display:flex;flex-direction:column;min-height:100vh}
@@ -38,10 +46,9 @@
   .nav-btn.ca.active{background:var(--ca);color:var(--white)}
   .content{flex:1;padding:2rem;max-width:1400px;margin:0 auto;width:100%}
 
-  /* Calendar Page */
-  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+  /* Calendar controls */
+  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap}
   .cal-title{font-size:1.6rem;font-weight:600}
-  .cal-controls{display:flex;align-items:center;gap:8px}
   .view-tabs{display:flex;background:var(--neutral-2);border-radius:var(--radius-sm);padding:3px;gap:2px}
   .view-tab{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;color:var(--text-2);transition:all .15s}
   .view-tab.active{background:var(--white);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
@@ -51,10 +58,8 @@
   .today-btn{padding:6px 14px;background:var(--white);border:1px solid var(--neutral-3);border-radius:var(--radius-sm);font-size:13px;font-weight:500;transition:all .15s}
   .today-btn:hover{background:var(--neutral-2)}
   .add-btn{padding:8px 18px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--white);display:flex;align-items:center;gap:6px;transition:all .15s}
-  .add-btn.ig{background:var(--ig)}
-  .add-btn.ig:hover{background:var(--ig-dark)}
-  .add-btn.ca{background:var(--ca)}
-  .add-btn.ca:hover{background:var(--ca-dark)}
+  .add-btn.ig{background:var(--ig)}.add-btn.ig:hover{background:var(--ig-dark)}
+  .add-btn.ca{background:var(--ca)}.add-btn.ca:hover{background:var(--ca-dark)}
 
   /* Legend */
   .legend{display:flex;gap:16px;margin-bottom:1rem;align-items:center;font-size:13px;color:var(--text-2)}
@@ -71,11 +76,10 @@
   .day-cell:hover{background:var(--neutral)}
   .day-cell.other-month{background:var(--neutral)}
   .day-cell.other-month .day-num{color:var(--text-3)}
-  .day-cell.today .day-num{background:var(--text);color:var(--white);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+  .day-cell.today .day-num span{background:var(--text);color:var(--white);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
   .day-num{font-size:13px;font-weight:500;margin-bottom:4px}
   .event-chip{border-radius:4px;padding:2px 6px;font-size:11px;font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity .15s}
   .event-chip:hover{opacity:.85}
-  .event-chip.busy{background:var(--busy-light);color:var(--busy);border-left:3px solid var(--busy)}
   .more-events{font-size:11px;color:var(--text-2);margin-top:2px}
 
   /* Week View */
@@ -84,14 +88,14 @@
   .week-col-head{text-align:center;padding:10px 4px;font-size:12px}
   .week-col-head .wday{font-weight:500;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
   .week-col-head .wdate{font-size:18px;font-weight:600;margin-top:2px}
-  .week-col-head .wdate.today-num{background:var(--text);color:var(--white);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:2px auto 0}
-  .week-body{display:grid;grid-template-columns:60px repeat(7,1fr);position:relative;overflow-y:auto;max-height:600px}
+  .week-col-head .today-num{background:var(--text);color:var(--white);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:2px auto 0}
+  .week-body{display:grid;grid-template-columns:60px repeat(7,1fr);overflow-y:auto;max-height:600px}
   .time-col{border-right:1px solid var(--neutral-3)}
   .time-slot{height:48px;border-bottom:1px solid var(--neutral-3);display:flex;align-items:flex-start;justify-content:flex-end;padding:4px 8px 0 0;font-size:11px;color:var(--text-3)}
-  .week-day-col{border-right:1px solid var(--neutral-3);position:relative;min-height:1152px}
+  .week-day-col{border-right:1px solid var(--neutral-3);position:relative;min-height:1152px;cursor:pointer}
   .week-day-col:last-child{border-right:none}
-  .week-hour-line{position:absolute;left:0;right:0;border-top:1px solid var(--neutral-3)}
-  .week-event{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 6px;font-size:11px;font-weight:500;overflow:hidden;cursor:pointer;transition:opacity .15s}
+  .week-hour-line{position:absolute;left:0;right:0;border-top:1px solid var(--neutral-3);pointer-events:none}
+  .week-event{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 6px;font-size:11px;font-weight:500;overflow:hidden;cursor:pointer;transition:opacity .15s;z-index:1}
   .week-event:hover{opacity:.85}
   .week-event.busy{background:var(--busy-light);color:var(--busy);border-left:3px solid var(--busy)}
 
@@ -99,8 +103,9 @@
   .day-view{background:var(--white);border-radius:var(--radius);border:1px solid var(--neutral-3);overflow:hidden}
   .day-view-header{padding:16px 20px;border-bottom:1px solid var(--neutral-3)}
   .day-view-body{display:grid;grid-template-columns:60px 1fr;overflow-y:auto;max-height:600px}
-  .day-event-col{position:relative;min-height:1152px;border-left:1px solid var(--neutral-3)}
-  .day-event{position:absolute;left:8px;right:8px;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;transition:opacity .15s}
+  .day-event-col{position:relative;min-height:1152px;border-left:1px solid var(--neutral-3);cursor:pointer}
+  .day-hour-line{position:absolute;left:0;right:0;border-top:1px solid var(--neutral-3);pointer-events:none}
+  .day-event{position:absolute;left:8px;right:8px;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;transition:opacity .15s;z-index:1}
   .day-event:hover{opacity:.85}
   .day-event.busy{background:var(--busy-light);color:var(--busy);border-left:3px solid var(--busy)}
 
@@ -125,19 +130,19 @@
   .panel-name{font-size:16px;font-weight:600;font-family:'Playfair Display',serif}
   .panel-events{padding:12px}
   .panel-event-item{padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:8px;border-left:4px solid;display:flex;gap:10px;align-items:flex-start}
-  .event-emoji{font-size:18px;flex-shrink:0}
+  .event-emoji-lg{font-size:18px;flex-shrink:0}
   .event-meta{flex:1;min-width:0}
-  .event-title{font-size:14px;font-weight:500;margin-bottom:2px}
-  .event-time{font-size:12px;color:var(--text-2)}
-  .event-desc{font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.4}
+  .event-title-text{font-size:14px;font-weight:500;margin-bottom:2px}
+  .event-time-text{font-size:12px;color:var(--text-2)}
+  .event-desc-text{font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.4}
   .empty-panel{text-align:center;padding:2rem;color:var(--text-3);font-size:14px}
 
   /* Modal */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .15s}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.15);animation:slideUp .2s}
+  .modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:500px;box-shadow:0 8px 32px rgba(0,0,0,0.15);animation:slideUp .2s;max-height:90vh;overflow-y:auto}
   @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .modal-header{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between}
+  .modal-header{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--white);z-index:1;padding-bottom:12px;border-bottom:1px solid var(--neutral-3)}
   .modal-title{font-size:1.2rem;font-weight:600}
   .modal-close{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-2);transition:all .1s}
   .modal-close:hover{background:var(--neutral-2);color:var(--text)}
@@ -146,27 +151,34 @@
   .form-label{display:block;font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:6px}
   .form-input{width:100%;padding:9px 12px;border:1px solid var(--neutral-3);border-radius:var(--radius-sm);font-size:14px;transition:border .15s;background:var(--white);color:var(--text)}
   .form-input:focus{outline:none;border-color:var(--text-3)}
-  .form-textarea{width:100%;padding:9px 12px;border:1px solid var(--neutral-3);border-radius:var(--radius-sm);font-size:14px;resize:vertical;min-height:80px;transition:border .15s;color:var(--text)}
+  .form-textarea{width:100%;padding:9px 12px;border:1px solid var(--neutral-3);border-radius:var(--radius-sm);font-size:14px;resize:vertical;min-height:80px;transition:border .15s;color:var(--text);background:var(--white)}
   .form-textarea:focus{outline:none;border-color:var(--text-3)}
   .color-picker{display:flex;gap:8px;flex-wrap:wrap}
   .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:transform .1s;border:2px solid transparent}
   .color-swatch.selected{transform:scale(1.15);border-color:var(--text)}
-  .emoji-picker-row{display:flex;gap:6px;flex-wrap:wrap}
-  .emoji-opt{font-size:20px;cursor:pointer;padding:4px;border-radius:4px;transition:background .1s;line-height:1}
+
+  /* FIXED: Emoji picker with custom input */
+  .emoji-section{border:1px solid var(--neutral-3);border-radius:var(--radius-sm);padding:10px}
+  .emoji-current{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .emoji-preview{font-size:28px;line-height:1}
+  .emoji-custom-input{flex:1;padding:7px 10px;border:1px solid var(--neutral-3);border-radius:var(--radius-sm);font-size:16px;width:80px}
+  .emoji-custom-input:focus{outline:none;border-color:var(--text-3)}
+  .emoji-grid{display:flex;gap:4px;flex-wrap:wrap}
+  .emoji-opt{font-size:20px;cursor:pointer;padding:5px;border-radius:4px;transition:background .1s;line-height:1;border:2px solid transparent}
   .emoji-opt:hover{background:var(--neutral-2)}
-  .emoji-opt.selected{background:var(--neutral-3)}
+  .emoji-opt.selected{background:var(--neutral-3);border-color:var(--neutral-3)}
+
   .modal-footer{padding:0 24px 20px;display:flex;gap:8px;justify-content:flex-end}
   .btn-primary{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--white);transition:all .15s}
-  .btn-primary.ig{background:var(--ig)}
-  .btn-primary.ig:hover{background:var(--ig-dark)}
-  .btn-primary.ca{background:var(--ca)}
-  .btn-primary.ca:hover{background:var(--ca-dark)}
+  .btn-primary.ig{background:var(--ig)}.btn-primary.ig:hover{background:var(--ig-dark)}
+  .btn-primary.ca{background:var(--ca)}.btn-primary.ca:hover{background:var(--ca-dark)}
   .btn-secondary{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--text-2);border:1px solid var(--neutral-3);transition:all .15s}
   .btn-secondary:hover{background:var(--neutral-2)}
-  .btn-danger{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:#dc2626;border:1px solid #fca5a5;transition:all .15s}
+  .btn-danger{padding:9px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:#dc2626;border:1px solid #fca5a5;transition:all .15s;margin-right:auto}
   .btn-danger:hover{background:#fef2f2}
+  .time-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-  /* Event Detail Popup */
+  /* Event Popup */
   .event-popup{position:fixed;z-index:150;background:var(--white);border-radius:var(--radius);border:1px solid var(--neutral-3);box-shadow:0 8px 32px rgba(0,0,0,0.15);width:280px;padding:16px;animation:fadeIn .15s}
   .popup-title{font-size:15px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px}
   .popup-time{font-size:12px;color:var(--text-2);margin-bottom:8px}
@@ -176,85 +188,106 @@
   .popup-edit-btn:hover{background:var(--neutral-2)}
   .popup-del-btn{padding:7px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;color:#dc2626;border:1px solid #fca5a5;transition:all .15s}
   .popup-del-btn:hover{background:#fef2f2}
-  .time-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  /* PWA install banner */
+  .pwa-banner{background:var(--text);color:var(--white);padding:10px 2rem;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .pwa-banner-close{background:none;border:1px solid rgba(255,255,255,.3);color:var(--white);padding:4px 12px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer}
 
   @media(max-width:768px){
     .content{padding:1rem}
     .year-grid{grid-template-columns:repeat(2,1fr)}
     .cross-view{grid-template-columns:1fr}
     .header{padding:0 1rem}
-    .nav-btn span{display:none}
+    .cal-header{flex-direction:column;align-items:flex-start}
+    .week-body{max-height:500px}
   }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useRef,useCallback}=React;
+const {useState,useEffect,useRef}=React;
 
-const COLORS=['#4A6FA5','#B5548A','#5C9E6E','#D4824A','#7B5EA7','#C85B5B','#4A9BA5','#8A7B4A'];
-const EMOJIS=['📅','💼','🏋️','🎉','✈️','🍽️','📚','🎵','🏠','💊','🎬','🤝','🛒','🏃','☕','🎮','💆','🌿'];
+const COLORS=['#4A6FA5','#B5548A','#5C9E6E','#D4824A','#7B5EA7','#C85B5B','#4A9BA5','#8A7B4A','#E07B8A','#6B9E6B'];
+const EMOJIS=['📅','💼','🏋️','🎉','✈️','🍽️','📚','🎵','🏠','💊','🎬','🤝','🛒','🏃','☕','🎮','💆','🌿','🐾','🎂','🎨','🏖️','🎓','💪','🧘','🌙','⭐','🦋'];
 const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const HOURS=Array.from({length:24},(_,i)=>i);
 
-function genId(){return Math.random().toString(36).slice(2)}
+function genId(){return Math.random().toString(36).slice(2,10)}
 function pad(n){return String(n).padStart(2,'0')}
 function fmt(d){return`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function fmtTime(t){if(!t)return'';const[h,m]=t.split(':');const hr=parseInt(h);return`${hr%12||12}:${m} ${hr<12?'AM':'PM'}`}
+function timeToY(t){if(!t)return 0;const[h,m]=t.split(':');return(parseInt(h)+parseInt(m)/60)*48}
+function timeDiff(s,e){if(!s||!e)return 48;const[sh,sm]=s.split(':'),[eh,em]=e.split(':');return Math.max(32,(parseInt(eh)-parseInt(sh))*48+(parseInt(em)-parseInt(sm))*48/60)}
+function yToTime(y){const totalMins=Math.round((y/48)*60);const h=Math.floor(totalMins/60);const m=Math.round((totalMins%60)/15)*15;return`${pad(Math.min(h,23))}:${pad(m===60?0:m)}`}
 
-const initialEvents={
+const today=new Date();
+const todayStr=fmt(today);
+
+const initEvents={
   ignacio:[
-    {id:genId(),title:'Reunión de trabajo',date:fmt(new Date()),startTime:'09:00',endTime:'10:00',color:'#4A6FA5',emoji:'💼',description:'Revisión semanal con el equipo'},
+    {id:genId(),title:'Reunión de trabajo',date:todayStr,startTime:'09:00',endTime:'10:00',color:'#4A6FA5',emoji:'💼',description:'Revisión semanal con el equipo'},
     {id:genId(),title:'Gimnasio',date:fmt(new Date(Date.now()+86400000)),startTime:'07:00',endTime:'08:30',color:'#5C9E6E',emoji:'🏋️',description:''},
   ],
   camila:[
-    {id:genId(),title:'Clase de yoga',date:fmt(new Date()),startTime:'18:00',endTime:'19:00',color:'#B5548A',emoji:'🌿',description:''},
+    {id:genId(),title:'Clase de yoga',date:todayStr,startTime:'18:00',endTime:'19:00',color:'#B5548A',emoji:'🌿',description:''},
     {id:genId(),title:'Almuerzo con mamá',date:fmt(new Date(Date.now()+86400000)),startTime:'13:00',endTime:'14:30',color:'#D4824A',emoji:'🍽️',description:'Cumpleaños'},
   ]
 };
 
-function EventChip({ev,owner,isBusy,onClick,style={}}){
-  const bg=isBusy?'var(--busy-light)':ev.color+'22';
-  const brd=isBusy?'var(--busy)':ev.color;
-  const col=isBusy?'var(--busy)':ev.color;
-  return(
-    <div className={`event-chip${isBusy?' busy':''}`}
-      style={{background:bg,borderLeft:`3px solid ${brd}`,color:col,...style}}
-      onClick={e=>{e.stopPropagation();onClick(ev,e)}}>
-      {!isBusy&&ev.emoji+' '}{isBusy?'Ocupado':ev.title}
-    </div>
-  );
-}
+function loadSaved(key,fallback){try{const s=localStorage.getItem(key);return s?JSON.parse(s):fallback}catch{return fallback}}
 
-function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate}){
+/* ---- MODAL ---- */
+function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate,defaultStartTime}){
   const [title,setTitle]=useState('');
-  const [date,setDate]=useState(defaultDate||fmt(new Date()));
+  const [date,setDate]=useState(defaultDate||todayStr);
   const [startTime,setStartTime]=useState('09:00');
   const [endTime,setEndTime]=useState('10:00');
   const [color,setColor]=useState(owner==='ignacio'?'#4A6FA5':'#B5548A');
   const [emoji,setEmoji]=useState('📅');
+  const [customEmoji,setCustomEmoji]=useState('');
   const [desc,setDesc]=useState('');
 
   useEffect(()=>{
+    if(!show)return;
     if(editEvent){
       setTitle(editEvent.title);setDate(editEvent.date);
       setStartTime(editEvent.startTime);setEndTime(editEvent.endTime);
       setColor(editEvent.color);setEmoji(editEvent.emoji||'📅');
-      setDesc(editEvent.description||'');
+      setCustomEmoji('');setDesc(editEvent.description||'');
     } else {
-      setTitle('');setDate(defaultDate||fmt(new Date()));
-      setStartTime('09:00');setEndTime('10:00');
+      setTitle('');setDate(defaultDate||todayStr);
+      const st=defaultStartTime||'09:00';
+      setStartTime(st);
+      const[h,m]=st.split(':');const eh=Math.min(parseInt(h)+1,23);
+      setEndTime(`${pad(eh)}:${m}`);
       setColor(owner==='ignacio'?'#4A6FA5':'#B5548A');
-      setEmoji('📅');setDesc('');
+      setEmoji('📅');setCustomEmoji('');setDesc('');
     }
-  },[show,editEvent,defaultDate,owner]);
+  },[show]);
 
   if(!show)return null;
+
+  const activeEmoji=customEmoji||emoji;
+
   const handleSave=()=>{
     if(!title.trim()||!date)return;
-    onSave({id:editEvent?.id||genId(),title:title.trim(),date,startTime,endTime,color,emoji,description:desc});
+    onSave({id:editEvent?.id||genId(),title:title.trim(),date,startTime,endTime,color,emoji:activeEmoji,description:desc});
   };
+
+  const handleCustomEmojiChange=(e)=>{
+    const val=e.target.value;
+    // Get last character entered which should be an emoji
+    if(val.length>0){
+      // Extract the last grapheme cluster (emoji)
+      const arr=[...val];
+      setCustomEmoji(arr[arr.length-1]);
+    } else {
+      setCustomEmoji('');
+    }
+  };
+
   return(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()}>
@@ -265,7 +298,7 @@ function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate}){
         <div className="modal-body">
           <div className="form-row">
             <label className="form-label">Título *</label>
-            <input className="form-input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Ej: Reunión de trabajo"/>
+            <input className="form-input" value={title} onChange={e=>setTitle(e.target.value)} placeholder="Ej: Reunión de trabajo" autoFocus/>
           </div>
           <div className="form-row">
             <label className="form-label">Fecha *</label>
@@ -285,17 +318,36 @@ function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate}){
             <label className="form-label">Color</label>
             <div className="color-picker">
               {COLORS.map(c=>(
-                <div key={c} className={`color-swatch${color===c?' selected':''}`}
-                  style={{background:c}} onClick={()=>setColor(c)}/>
+                <div key={c} className={`color-swatch${color===c?' selected':''}`} style={{background:c}} onClick={()=>setColor(c)}/>
               ))}
             </div>
           </div>
           <div className="form-row">
             <label className="form-label">Emoji</label>
-            <div className="emoji-picker-row">
-              {EMOJIS.map(e=>(
-                <span key={e} className={`emoji-opt${emoji===e?' selected':''}`} onClick={()=>setEmoji(e)}>{e}</span>
-              ))}
+            <div className="emoji-section">
+              <div className="emoji-current">
+                <span className="emoji-preview">{activeEmoji}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,color:'var(--text-2)',marginBottom:4}}>O escribe/pega tu propio emoji:</div>
+                  <input
+                    className="form-input"
+                    value={customEmoji}
+                    onChange={handleCustomEmojiChange}
+                    placeholder="✍️"
+                    style={{width:'100%',fontSize:18}}
+                    maxLength={4}
+                  />
+                </div>
+              </div>
+              <div className="emoji-grid">
+                {EMOJIS.map(e=>(
+                  <button key={e} type="button"
+                    className={`emoji-opt${(!customEmoji&&emoji===e)?' selected':''}`}
+                    onClick={()=>{setEmoji(e);setCustomEmoji('')}}>
+                    {e}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="form-row">
@@ -306,23 +358,26 @@ function Modal({show,onClose,onSave,onDelete,editEvent,owner,defaultDate}){
         <div className="modal-footer">
           {editEvent&&<button className="btn-danger" onClick={()=>onDelete(editEvent.id)}>Eliminar</button>}
           <button className="btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className={`btn-primary ${owner}`} onClick={handleSave}>Guardar</button>
+          <button className={`btn-primary ${owner}`} onClick={handleSave} disabled={!title.trim()||!date}>Guardar</button>
         </div>
       </div>
     </div>
   );
 }
 
-function EventPopup({ev,anchor,onClose,onEdit,owner}){
+/* ---- EVENT POPUP ---- */
+function EventPopup({ev,anchor,onClose,onEdit}){
   const ref=useRef();
   useEffect(()=>{
     const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose()};
-    document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);
+    document.addEventListener('mousedown',h);
+    return()=>document.removeEventListener('mousedown',h);
   },[onClose]);
   if(!ev||!anchor)return null;
-  const style={top:anchor.y,left:Math.min(anchor.x,window.innerWidth-300)};
+  const left=Math.min(anchor.x,window.innerWidth-296);
+  const top=Math.min(anchor.y,window.innerHeight-200);
   return(
-    <div className="event-popup" ref={ref} style={style}>
+    <div className="event-popup" ref={ref} style={{top,left}}>
       <div className="popup-title" style={{color:ev.color}}>
         <span>{ev.emoji}</span>{ev.title}
       </div>
@@ -330,53 +385,51 @@ function EventPopup({ev,anchor,onClose,onEdit,owner}){
       {ev.description&&<div className="popup-desc">{ev.description}</div>}
       <div className="popup-actions">
         <button className="popup-edit-btn" onClick={()=>onEdit(ev)}>✏️ Editar</button>
-        <button className="popup-del-btn" onClick={()=>{onEdit(ev,'delete')}}>🗑</button>
+        <button className="popup-del-btn" onClick={()=>onEdit(ev,'delete')}>🗑</button>
       </div>
     </div>
   );
 }
 
+function eventsOnDate(events,d){return events.filter(e=>e.date===fmt(d))}
+
 function getMonthDays(year,month){
   const first=new Date(year,month,1).getDay();
   const last=new Date(year,month+1,0).getDate();
   const days=[];
-  for(let i=0;i<first;i++){
-    const d=new Date(year,month,1-first+i);
-    days.push({date:d,curr:false});
-  }
-  for(let i=1;i<=last;i++){
-    days.push({date:new Date(year,month,i),curr:true});
-  }
-  while(days.length%7!==0){
-    const d=new Date(year,month+1,days.length-first-last+1);
-    days.push({date:d,curr:false});
-  }
+  for(let i=0;i<first;i++){days.push({date:new Date(year,month,1-first+i),curr:false})}
+  for(let i=1;i<=last;i++){days.push({date:new Date(year,month,i),curr:true})}
+  while(days.length%7!==0){days.push({date:new Date(year,month+1,days.length-first-last+1),curr:false})}
   return days;
 }
 
-function eventsOnDate(events,d){return events.filter(e=>e.date===fmt(d))}
-function timeToY(t){if(!t)return 0;const[h,m]=t.split(':');return(parseInt(h)+parseInt(m)/60)*48}
-function timeDiff(s,e){if(!s||!e)return 48;const[sh,sm]=s.split(':'),[eh,em]=e.split(':');return Math.max(48,(parseInt(eh)-parseInt(sh))*48+(parseInt(em)-parseInt(sm))*48/60)}
-
-function MonthView({ownEvents,otherEvents,today,year,month,owner,onDayClick,onEventClick}){
+/* ---- MONTH VIEW ---- */
+function MonthView({ownEvents,otherEvents,year,month,onDayClick,onEventClick}){
   const days=getMonthDays(year,month);
   return(
     <div className="month-grid">
       <div className="week-header">{DAYS.map(d=><div key={d} className="week-day">{d}</div>)}</div>
       <div className="days-grid">
         {days.map(({date,curr},i)=>{
-          const d=fmt(date);
           const own=eventsOnDate(ownEvents,date);
           const other=eventsOnDate(otherEvents,date);
-          const isToday=fmt(date)===fmt(today);
+          const isToday=fmt(date)===todayStr;
           return(
             <div key={i} className={`day-cell${!curr?' other-month':''}${isToday?' today':''}`}
               onClick={()=>onDayClick(date)}>
               <div className="day-num"><span>{date.getDate()}</span></div>
               {own.slice(0,2).map(ev=>(
-                <EventChip key={ev.id} ev={ev} owner={owner} isBusy={false} onClick={onEventClick}/>
+                <div key={ev.id} className="event-chip"
+                  style={{background:ev.color+'22',borderLeft:`3px solid ${ev.color}`,color:ev.color}}
+                  onClick={e=>{e.stopPropagation();onEventClick(ev,e)}}>
+                  {ev.emoji} {ev.title}
+                </div>
               ))}
-              {other.length>0&&<EventChip ev={other[0]} owner={owner} isBusy={true} onClick={()=>{}}/>}
+              {other.length>0&&(
+                <div className="event-chip" style={{background:'var(--busy-light)',borderLeft:'3px solid var(--busy)',color:'var(--busy)'}}>
+                  Ocupado
+                </div>
+              )}
               {own.length>2&&<div className="more-events">+{own.length-2} más</div>}
             </div>
           );
@@ -386,9 +439,9 @@ function MonthView({ownEvents,otherEvents,today,year,month,owner,onDayClick,onEv
   );
 }
 
-function WeekView({ownEvents,otherEvents,weekStart,owner,onEventClick}){
+/* ---- WEEK VIEW (FIXED: click on column to add) ---- */
+function WeekView({ownEvents,otherEvents,weekStart,onEventClick,onColClick}){
   const cols=Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(d.getDate()+i);return d});
-  const today=new Date();
   return(
     <div className="week-view">
       <div className="week-cols-header">
@@ -396,7 +449,7 @@ function WeekView({ownEvents,otherEvents,weekStart,owner,onEventClick}){
         {cols.map((d,i)=>(
           <div key={i} className="week-col-head">
             <div className="wday">{DAYS[d.getDay()]}</div>
-            <div className={`wdate${fmt(d)===fmt(today)?' today-num':''}`}>{d.getDate()}</div>
+            <div className={fmt(d)===todayStr?'wdate today-num':'wdate'}>{d.getDate()}</div>
           </div>
         ))}
       </div>
@@ -408,10 +461,20 @@ function WeekView({ownEvents,otherEvents,weekStart,owner,onEventClick}){
           const own=eventsOnDate(ownEvents,d);
           const other=eventsOnDate(otherEvents,d);
           return(
-            <div key={ci} className="week-day-col">
+            <div key={ci} className="week-day-col"
+              onClick={e=>{
+                // Only fire if clicking the column bg, not an event
+                if(e.target===e.currentTarget||e.target.classList.contains('week-hour-line')){
+                  const rect=e.currentTarget.getBoundingClientRect();
+                  const relY=e.clientY-rect.top;
+                  onColClick(d,relY);
+                }
+              }}>
               {HOURS.map(h=><div key={h} className="week-hour-line" style={{top:h*48}}/>)}
               {other.map(ev=>(
-                <div key={ev.id} className="week-event busy" style={{top:timeToY(ev.startTime),height:timeDiff(ev.startTime,ev.endTime)}}/>
+                <div key={ev.id} className="week-event busy"
+                  style={{top:timeToY(ev.startTime),height:timeDiff(ev.startTime,ev.endTime)}}
+                  onClick={e=>e.stopPropagation()}/>
               ))}
               {own.map(ev=>(
                 <div key={ev.id} className="week-event"
@@ -428,30 +491,50 @@ function WeekView({ownEvents,otherEvents,weekStart,owner,onEventClick}){
   );
 }
 
-function DayView({ownEvents,otherEvents,date,owner,onEventClick}){
-  const own=eventsOnDate(ownEvents,date);
-  const other=eventsOnDate(otherEvents,date);
-  const d=new Date(date+'T00:00:00');
+/* ---- DAY VIEW (FIXED: shows events correctly + click to add) ---- */
+function DayView({ownEvents,otherEvents,date,onEventClick,onColClick}){
+  const own=eventsOnDate(ownEvents,new Date(date+'T12:00:00'));
+  const other=eventsOnDate(otherEvents,new Date(date+'T12:00:00'));
+  const d=new Date(date+'T12:00:00');
   return(
     <div className="day-view">
       <div className="day-view-header">
-        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem'}}>{DAYS[d.getDay()]}, {d.getDate()} de {MONTHS[d.getMonth()]}</h3>
+        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem'}}>
+          {DAYS[d.getDay()]}, {d.getDate()} de {MONTHS[d.getMonth()]} {d.getFullYear()}
+        </h3>
       </div>
       <div className="day-view-body">
         <div className="time-col">
           {HOURS.map(h=><div key={h} className="time-slot">{h===0?'':h<12?`${h}am`:h===12?'12pm':`${h-12}pm`}</div>)}
         </div>
-        <div className="day-event-col">
-          {HOURS.map(h=><div key={h} className="week-hour-line" style={{top:h*48}}/>)}
+        <div className="day-event-col"
+          onClick={e=>{
+            if(e.target===e.currentTarget||e.target.classList.contains('day-hour-line')){
+              const rect=e.currentTarget.getBoundingClientRect();
+              const relY=e.clientY-rect.top;
+              onColClick(relY);
+            }
+          }}>
+          {HOURS.map(h=><div key={h} className="day-hour-line" style={{top:h*48}}/>)}
           {other.map(ev=>(
-            <div key={ev.id} className="day-event busy" style={{top:timeToY(ev.startTime)+2,height:timeDiff(ev.startTime,ev.endTime)-4,left:'8px',right:'55%'}}/>
+            <div key={ev.id} className="day-event busy"
+              style={{top:timeToY(ev.startTime)+2,height:timeDiff(ev.startTime,ev.endTime)-4,left:'8px',right:'52%'}}
+              onClick={e=>e.stopPropagation()}/>
           ))}
-          {own.map((ev,i)=>(
+          {own.map(ev=>(
             <div key={ev.id} className="day-event"
-              style={{top:timeToY(ev.startTime)+2,height:timeDiff(ev.startTime,ev.endTime)-4,left:'calc(50% + 8px)',right:'8px',background:ev.color+'22',borderLeft:`4px solid ${ev.color}`,color:ev.color}}
+              style={{
+                top:timeToY(ev.startTime)+2,
+                height:timeDiff(ev.startTime,ev.endTime)-4,
+                left:other.length>0?'calc(50% + 4px)':'8px',
+                right:'8px',
+                background:ev.color+'22',
+                borderLeft:`4px solid ${ev.color}`,
+                color:ev.color
+              }}
               onClick={e=>{e.stopPropagation();onEventClick(ev,e)}}>
-              <div style={{fontWeight:500}}>{ev.emoji} {ev.title}</div>
-              <div style={{fontSize:'11px',opacity:.8}}>{fmtTime(ev.startTime)}</div>
+              <div style={{fontWeight:500,fontSize:12}}>{ev.emoji} {ev.title}</div>
+              <div style={{fontSize:11,opacity:.8}}>{fmtTime(ev.startTime)}–{fmtTime(ev.endTime)}</div>
             </div>
           ))}
         </div>
@@ -460,21 +543,23 @@ function DayView({ownEvents,otherEvents,date,owner,onEventClick}){
   );
 }
 
+/* ---- YEAR VIEW ---- */
 function YearView({ownEvents,year,onMonthClick}){
-  const today=new Date();
   return(
     <div className="year-grid">
       {Array.from({length:12},(_,m)=>{
         const days=getMonthDays(year,m);
-        const evDates=new Set(ownEvents.filter(e=>new Date(e.date+'T00:00:00').getMonth()===m&&new Date(e.date+'T00:00:00').getFullYear()===year).map(e=>e.date));
+        const evDates=new Set(ownEvents.filter(e=>{
+          const d=new Date(e.date+'T12:00:00');
+          return d.getMonth()===m&&d.getFullYear()===year;
+        }).map(e=>e.date));
         return(
           <div key={m} className="mini-month" onClick={()=>onMonthClick(m)}>
             <div className="mini-month-title">{MONTHS[m]}</div>
             <div className="mini-week-header">{['D','L','M','M','J','V','S'].map((d,i)=><div key={i} className="mini-wday">{d}</div>)}</div>
             <div className="mini-days">
               {days.map(({date,curr},i)=>(
-                <div key={i} className={`mini-day${!curr?' other':''}${fmt(date)===fmt(today)?' today-cell':''}${evDates.has(fmt(date))?' has-event':''}`}
-                  style={evDates.has(fmt(date))&&!curr?{}:{}}>
+                <div key={i} className={`mini-day${!curr?' other':''}${fmt(date)===todayStr?' today-cell':''}${evDates.has(fmt(date))?' has-event':''}`}>
                   {date.getDate()}
                 </div>
               ))}
@@ -486,31 +571,28 @@ function YearView({ownEvents,year,onMonthClick}){
   );
 }
 
-function CrossView({ignacioEvents,camilaEvents}){
-  const today=new Date();
-  const todayStr=fmt(today);
-  const upcoming=30;
-  const cutoff=new Date(today);cutoff.setDate(cutoff.getDate()+upcoming);
-  const filterUpcoming=evs=>evs.filter(e=>e.date>=todayStr&&e.date<=fmt(cutoff)).sort((a,b)=>a.date.localeCompare(b.date)||a.startTime.localeCompare(b.startTime));
-  const igEvs=filterUpcoming(ignacioEvents);
-  const caEvs=filterUpcoming(camilaEvents);
-
-  const renderEvent=(ev,color)=>(
+/* ---- CROSS VIEW ---- */
+function CrossView({igEvs,caEvs}){
+  const cutoff=new Date(today);cutoff.setDate(cutoff.getDate()+30);
+  const filter=evs=>evs.filter(e=>e.date>=todayStr&&e.date<=fmt(cutoff)).sort((a,b)=>a.date.localeCompare(b.date)||a.startTime.localeCompare(b.startTime));
+  const ig=filter(igEvs),ca=filter(caEvs);
+  const renderEv=ev=>(
     <div key={ev.id} className="panel-event-item" style={{background:ev.color+'11',borderColor:ev.color}}>
-      <span className="event-emoji">{ev.emoji}</span>
+      <span className="event-emoji-lg">{ev.emoji}</span>
       <div className="event-meta">
-        <div className="event-title">{ev.title}</div>
-        <div className="event-time">{new Date(ev.date+'T00:00:00').getDate()} {MONTHS[new Date(ev.date+'T00:00:00').getMonth()]} · {fmtTime(ev.startTime)}–{fmtTime(ev.endTime)}</div>
-        {ev.description&&<div className="event-desc">{ev.description}</div>}
+        <div className="event-title-text">{ev.title}</div>
+        <div className="event-time-text">
+          {new Date(ev.date+'T12:00:00').getDate()} {MONTHS[new Date(ev.date+'T12:00:00').getMonth()]} · {fmtTime(ev.startTime)}–{fmtTime(ev.endTime)}
+        </div>
+        {ev.description&&<div className="event-desc-text">{ev.description}</div>}
       </div>
     </div>
   );
-
   return(
     <div>
-      <div style={{marginBottom:'1rem'}}>
+      <div style={{marginBottom:'1.5rem'}}>
         <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem'}}>Vista compartida</h2>
-        <p style={{color:'var(--text-2)',fontSize:'14px',marginTop:'4px'}}>Próximos 30 días — transparencia total entre Ignacio y Camila</p>
+        <p style={{color:'var(--text-2)',fontSize:'14px',marginTop:'4px'}}>Próximos 30 días — transparencia total</p>
       </div>
       <div className="cross-view">
         <div className="person-panel">
@@ -519,7 +601,7 @@ function CrossView({ignacioEvents,camilaEvents}){
             <div className="panel-name">Ignacio</div>
           </div>
           <div className="panel-events">
-            {igEvs.length===0?<div className="empty-panel">Sin actividades próximas</div>:igEvs.map(ev=>renderEvent(ev,'ig'))}
+            {ig.length===0?<div className="empty-panel">Sin actividades próximas</div>:ig.map(renderEv)}
           </div>
         </div>
         <div className="person-panel">
@@ -528,7 +610,7 @@ function CrossView({ignacioEvents,camilaEvents}){
             <div className="panel-name">Camila</div>
           </div>
           <div className="panel-events">
-            {caEvs.length===0?<div className="empty-panel">Sin actividades próximas</div>:caEvs.map(ev=>renderEvent(ev,'ca'))}
+            {ca.length===0?<div className="empty-panel">Sin actividades próximas</div>:ca.map(renderEv)}
           </div>
         </div>
       </div>
@@ -536,54 +618,95 @@ function CrossView({ignacioEvents,camilaEvents}){
   );
 }
 
+/* ---- CALENDAR PAGE ---- */
 function CalendarPage({owner,ownEvents,otherEvents,onAdd,onEdit,onDelete}){
-  const today=new Date();
   const [view,setView]=useState('month');
   const [year,setYear]=useState(today.getFullYear());
   const [month,setMonth]=useState(today.getMonth());
   const [weekStart,setWeekStart]=useState(()=>{const d=new Date(today);d.setDate(d.getDate()-d.getDay());return d});
-  const [dayDate,setDayDate]=useState(fmt(today));
+  const [dayDate,setDayDate]=useState(todayStr);
   const [showModal,setShowModal]=useState(false);
   const [editEvent,setEditEvent]=useState(null);
-  const [defaultDate,setDefaultDate]=useState(fmt(today));
+  const [defaultDate,setDefaultDate]=useState(todayStr);
+  const [defaultStartTime,setDefaultStartTime]=useState('09:00');
   const [popup,setPopup]=useState(null);
 
   const personColor=owner==='ignacio'?'var(--ig)':'var(--ca)';
   const personName=owner==='ignacio'?'Ignacio':'Camila';
+  const otherName=owner==='ignacio'?'Camila':'Ignacio';
 
   const navPrev=()=>{
-    if(view==='year'){setYear(y=>y-1)}
-    else if(view==='month'){setMonth(m=>{if(m===0){setYear(y=>y-1);return 11}return m-1})}
-    else if(view==='week'){setWeekStart(d=>{const nd=new Date(d);nd.setDate(nd.getDate()-7);return nd})}
-    else if(view==='day'){setDayDate(d=>{const nd=new Date(d+'T00:00:00');nd.setDate(nd.getDate()-1);return fmt(nd)})}
+    if(view==='year')setYear(y=>y-1);
+    else if(view==='month')setMonth(m=>{if(m===0){setYear(y=>y-1);return 11}return m-1});
+    else if(view==='week')setWeekStart(d=>{const nd=new Date(d);nd.setDate(nd.getDate()-7);return nd});
+    else if(view==='day'){setDayDate(d=>{const nd=new Date(d+'T12:00:00');nd.setDate(nd.getDate()-1);return fmt(nd)})}
   };
   const navNext=()=>{
-    if(view==='year'){setYear(y=>y+1)}
-    else if(view==='month'){setMonth(m=>{if(m===11){setYear(y=>y+1);return 0}return m+1})}
-    else if(view==='week'){setWeekStart(d=>{const nd=new Date(d);nd.setDate(nd.getDate()+7);return nd})}
-    else if(view==='day'){setDayDate(d=>{const nd=new Date(d+'T00:00:00');nd.setDate(nd.getDate()+1);return fmt(nd)})}
+    if(view==='year')setYear(y=>y+1);
+    else if(view==='month')setMonth(m=>{if(m===11){setYear(y=>y+1);return 0}return m+1});
+    else if(view==='week')setWeekStart(d=>{const nd=new Date(d);nd.setDate(nd.getDate()+7);return nd});
+    else if(view==='day'){setDayDate(d=>{const nd=new Date(d+'T12:00:00');nd.setDate(nd.getDate()+1);return fmt(nd)})}
   };
-  const goToday=()=>{setYear(today.getFullYear());setMonth(today.getMonth());const d=new Date(today);d.setDate(d.getDate()-d.getDay());setWeekStart(d);setDayDate(fmt(today))};
+  const goToday=()=>{
+    setYear(today.getFullYear());setMonth(today.getMonth());
+    const d=new Date(today);d.setDate(d.getDate()-d.getDay());setWeekStart(d);
+    setDayDate(todayStr);
+  };
 
   const titleLabel=()=>{
     if(view==='year')return String(year);
     if(view==='month')return`${MONTHS[month]} ${year}`;
     if(view==='week'){const e=new Date(weekStart);e.setDate(e.getDate()+6);return`${weekStart.getDate()} – ${e.getDate()} ${MONTHS[e.getMonth()]} ${e.getFullYear()}`}
-    if(view==='day'){const d=new Date(dayDate+'T00:00:00');return`${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${year}`}
+    if(view==='day'){const d=new Date(dayDate+'T12:00:00');return`${DAYS[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
   };
 
-  const handleDayClick=(date)=>{setDefaultDate(fmt(date));setEditEvent(null);setShowModal(true)};
-  const handleEventClick=(ev,e)=>{setPopup({ev,anchor:{x:e.clientX,y:e.clientY+12}})};
-  const handleEdit=(ev,action)=>{
+  const openNew=(date,startTime)=>{
+    setEditEvent(null);
+    setDefaultDate(fmt(date)||todayStr);
+    setDefaultStartTime(startTime||'09:00');
+    setShowModal(true);
+  };
+
+  // FIX 1: Day click on month works
+  const handleDayClick=(date)=>openNew(date,'09:00');
+
+  // FIX 2: Click on week column to add
+  const handleWeekColClick=(date,relY)=>{
+    const st=yToTime(relY);
+    openNew(date,st);
+  };
+
+  // FIX: Click on day column to add
+  const handleDayColClick=(relY)=>{
+    const d=new Date(dayDate+'T12:00:00');
+    openNew(d,yToTime(relY));
+  };
+
+  const handleEventClick=(ev,e)=>{
+    e.stopPropagation();
+    setPopup({ev,anchor:{x:e.clientX+8,y:e.clientY+8}});
+  };
+  const handlePopupEdit=(ev,action)=>{
     setPopup(null);
     if(action==='delete'){onDelete(ev.id);return}
-    setEditEvent(ev);setDefaultDate(ev.date);setShowModal(true);
+    setEditEvent(ev);setDefaultDate(ev.date);setDefaultStartTime(ev.startTime);setShowModal(true);
   };
   const handleSave=(ev)=>{
     if(editEvent)onEdit(ev);else onAdd(ev);
     setShowModal(false);setEditEvent(null);
   };
   const handleDelete=(id)=>{onDelete(id);setShowModal(false);setEditEvent(null)};
+
+  // FIX 1 (Day view): when switching to day view from week, set the day
+  const handleViewChange=(v)=>{
+    if(v==='day'&&view==='week'){
+      setDayDate(fmt(weekStart));
+    }
+    if(v==='day'&&view==='month'){
+      setDayDate(fmt(new Date(year,month,today.getDate()>0?today.getDate():1)));
+    }
+    setView(v);
+  };
 
   return(
     <div>
@@ -594,10 +717,8 @@ function CalendarPage({owner,ownEvents,otherEvents,onAdd,onEdit,onDelete}){
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
           <div className="view-tabs">
-            {['year','month','week','day'].map(v=>(
-              <button key={v} className={`view-tab${view===v?' active':''}`} onClick={()=>setView(v)}>
-                {v==='year'?'Año':v==='month'?'Mes':v==='week'?'Semana':'Día'}
-              </button>
+            {[['year','Año'],['month','Mes'],['week','Semana'],['day','Día']].map(([v,l])=>(
+              <button key={v} className={`view-tab${view===v?' active':''}`} onClick={()=>handleViewChange(v)}>{l}</button>
             ))}
           </div>
           <div className="nav-arrows">
@@ -605,7 +726,7 @@ function CalendarPage({owner,ownEvents,otherEvents,onAdd,onEdit,onDelete}){
             <button className="today-btn" onClick={goToday}>Hoy</button>
             <button className="arrow-btn" onClick={navNext}>›</button>
           </div>
-          <button className={`add-btn ${owner}`} onClick={()=>{setEditEvent(null);setDefaultDate(fmt(today));setShowModal(true)}}>
+          <button className={`add-btn ${owner}`} onClick={()=>openNew(new Date(),null)}>
             + Nueva actividad
           </button>
         </div>
@@ -613,33 +734,35 @@ function CalendarPage({owner,ownEvents,otherEvents,onAdd,onEdit,onDelete}){
 
       <div className="legend">
         <div className="legend-item"><div className="legend-dot" style={{background:personColor}}/> Mis actividades</div>
-        <div className="legend-item"><div className="legend-dot" style={{background:'var(--busy)'}}/> {owner==='ignacio'?'Camila':'Ignacio'} (ocupado)</div>
+        <div className="legend-item"><div className="legend-dot" style={{background:'var(--busy)'}}/> {otherName} (ocupado/a)</div>
+        {(view==='week'||view==='day')&&<span style={{fontSize:12,color:'var(--text-3)'}}>· Haz clic en el horario para agregar</span>}
       </div>
 
       <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',marginBottom:'1rem',color:'var(--text-2)'}}>{titleLabel()}</h2>
 
-      {view==='month'&&<MonthView ownEvents={ownEvents} otherEvents={otherEvents} today={today} year={year} month={month} owner={owner} onDayClick={handleDayClick} onEventClick={handleEventClick}/>}
-      {view==='week'&&<WeekView ownEvents={ownEvents} otherEvents={otherEvents} weekStart={weekStart} owner={owner} onEventClick={handleEventClick}/>}
-      {view==='day'&&<DayView ownEvents={ownEvents} otherEvents={otherEvents} date={dayDate} owner={owner} onEventClick={handleEventClick}/>}
+      {view==='month'&&<MonthView ownEvents={ownEvents} otherEvents={otherEvents} year={year} month={month} onDayClick={handleDayClick} onEventClick={handleEventClick}/>}
+      {view==='week'&&<WeekView ownEvents={ownEvents} otherEvents={otherEvents} weekStart={weekStart} onEventClick={handleEventClick} onColClick={handleWeekColClick}/>}
+      {view==='day'&&<DayView ownEvents={ownEvents} otherEvents={otherEvents} date={dayDate} onEventClick={handleEventClick} onColClick={handleDayColClick}/>}
       {view==='year'&&<YearView ownEvents={ownEvents} year={year} onMonthClick={m=>{setMonth(m);setView('month')}}/>}
 
-      <Modal show={showModal} onClose={()=>{setShowModal(false);setEditEvent(null)}} onSave={handleSave} onDelete={handleDelete} editEvent={editEvent} owner={owner} defaultDate={defaultDate}/>
-      {popup&&<EventPopup ev={popup.ev} anchor={popup.anchor} onClose={()=>setPopup(null)} onEdit={handleEdit} owner={owner}/>}
+      <Modal show={showModal} onClose={()=>{setShowModal(false);setEditEvent(null)}} onSave={handleSave} onDelete={handleDelete} editEvent={editEvent} owner={owner} defaultDate={defaultDate} defaultStartTime={defaultStartTime}/>
+      {popup&&<EventPopup ev={popup.ev} anchor={popup.anchor} onClose={()=>setPopup(null)} onEdit={handlePopupEdit}/>}
     </div>
   );
 }
 
+/* ---- APP ---- */
 function App(){
   const [tab,setTab]=useState('ignacio');
-  const [igEvents,setIgEvents]=useState(()=>{
-    try{const s=localStorage.getItem('cal_ig');return s?JSON.parse(s):initialEvents.ignacio}catch{return initialEvents.ignacio}
-  });
-  const [caEvents,setCaEvents]=useState(()=>{
-    try{const s=localStorage.getItem('cal_ca');return s?JSON.parse(s):initialEvents.camila}catch{return initialEvents.camila}
-  });
+  const [showPWA,setShowPWA]=useState(true);
+  const [igEvents,setIgEvents]=useState(()=>loadSaved('nosotros_ig',initEvents.ignacio));
+  const [caEvents,setCaEvents]=useState(()=>loadSaved('nosotros_ca',initEvents.camila));
 
-  useEffect(()=>{try{localStorage.setItem('cal_ig',JSON.stringify(igEvents))}catch{}},[igEvents]);
-  useEffect(()=>{try{localStorage.setItem('cal_ca',JSON.stringify(caEvents))}catch{}},[caEvents]);
+  useEffect(()=>{try{localStorage.setItem('nosotros_ig',JSON.stringify(igEvents))}catch{}},[igEvents]);
+  useEffect(()=>{try{localStorage.setItem('nosotros_ca',JSON.stringify(caEvents))}catch{}},[caEvents]);
+
+  // Check if already installed as PWA
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
 
   const addIg=ev=>setIgEvents(p=>[...p,ev]);
   const editIg=ev=>setIgEvents(p=>p.map(e=>e.id===ev.id?ev:e));
@@ -650,24 +773,24 @@ function App(){
 
   return(
     <div className="app">
+      {showPWA&&!isStandalone&&(
+        <div className="pwa-banner">
+          <span>📱 Para agregar como app en iPhone: Safari → Compartir → "Añadir a pantalla de inicio"</span>
+          <button className="pwa-banner-close" onClick={()=>setShowPWA(false)}>✕</button>
+        </div>
+      )}
       <header className="header">
         <div className="logo">nosotros <span>♡</span></div>
         <nav className="nav">
-          <button className={`nav-btn ig${tab==='ignacio'?' active':''}`} onClick={()=>setTab('ignacio')}>
-            <span>Ignacio</span>
-          </button>
-          <button className={`nav-btn ca${tab==='camila'?' active':''}`} onClick={()=>setTab('camila')}>
-            <span>Camila</span>
-          </button>
-          <button className={`nav-btn${tab==='cross'?' active':''}`} onClick={()=>setTab('cross')}>
-            <span>Vista compartida</span>
-          </button>
+          <button className={`nav-btn ig${tab==='ignacio'?' active':''}`} onClick={()=>setTab('ignacio')}>Ignacio</button>
+          <button className={`nav-btn ca${tab==='camila'?' active':''}`} onClick={()=>setTab('camila')}>Camila</button>
+          <button className={`nav-btn${tab==='cross'?' active':''}`} onClick={()=>setTab('cross')}>Compartida</button>
         </nav>
       </header>
       <main className="content">
         {tab==='ignacio'&&<CalendarPage owner="ignacio" ownEvents={igEvents} otherEvents={caEvents} onAdd={addIg} onEdit={editIg} onDelete={delIg}/>}
         {tab==='camila'&&<CalendarPage owner="camila" ownEvents={caEvents} otherEvents={igEvents} onAdd={addCa} onEdit={editCa} onDelete={delCa}/>}
-        {tab==='cross'&&<CrossView ignacioEvents={igEvents} camilaEvents={caEvents}/>}
+        {tab==='cross'&&<CrossView igEvs={igEvents} caEvs={caEvents}/>}
       </main>
     </div>
   );
